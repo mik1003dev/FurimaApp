@@ -1,0 +1,700 @@
+/* ================================
+   全体のベース
+================================ */
+
+
+body.app {
+    margin: 0;
+    font-family: "Inter", "Noto Sans JP", sans-serif;
+    background: #ffffff;
+    /* ← 白にする */
+}
+
+.page-wrapper {
+    width: 100%;
+    /* ← 横いっぱい */
+    background: #ffffff;
+}
+
+
+.main__inner {
+    padding: 24px 40px 40px;
+}
+
+/* ================================
+   ヘッダー（Figma完全対応版）
+================================ */
+
+.header {
+    background: #000000;
+    color: #ffffff;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.header__inner {
+    display: flex;
+    align-items: center;
+    height: 80px;
+    padding: 0 40px;
+    box-sizing: border-box;
+}
+
+.header__logo {
+    width: 370px;
+}
+
+.header__logo a {
+    text-decoration: none;
+}
+
+.header__logo-image {
+    height: 36px;
+    width: auto;
+    display: block;
+}
+
+.header__search {
+    width: 563px;
+    margin-left: 40px;
+}
+
+.search-form {
+    display: block;
+}
+
+.search-form__input {
+    width: 100%;
+    height: 48px;
+    padding: 0 16px;
+    border-radius: 4px;
+    border: 1px solid #333333;
+    font-size: 24px;
+    box-sizing: border-box;
+}
+
+.header__nav {
+    width: 463px;
+    margin-left: auto;
+}
+
+.header__nav-list {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 32px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.header__nav-link {
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 24px;
+    font-weight: 400;
+}
+
+.header__nav-button {
+    display: inline-block;
+    padding: 3px 24px;
+    border-radius: 4px;
+    border: 1px solid #ffffff;
+    background: #ffffff;
+    color: #000000;
+    font-size: 24px;
+    font-weight: 400;
+    text-decoration: none;
+}
+
+/* 商品詳細だけ、ヘッダー直下の詰まりを解消 */
+.main--detail .main__inner {
+    padding-top: 64px;
+    /* 好みで 32〜64px */
+}
+
+/* ================================
+   2段目タブ「おすすめ / マイリスト」
+================================ */
+
+/* タブ全体のバー */
+.header__tabs {
+    display: flex;
+    align-items: flex-end;
+    /* 下揃えにしてラインに文字を寄せる */
+    gap: 56px;
+    /* タブ同士の間隔（Figmaっぽく少し広め） */
+    height: 56px;
+    /* バーの高さ */
+    padding-left: 180px;
+    padding-right: 40px;
+    padding-top: 24px;
+    border-bottom: 1px solid #e5e5e5;
+    background: #ffffff;
+}
+
+/* 各タブの文字スタイル */
+.header__tab {
+    text-decoration: none;
+    color: #777777;
+    /* 非アクティブは薄いグレー */
+    font-size: 24px;
+    /* 文字サイズ */
+    font-weight: 400;
+    padding-bottom: 10px;
+    /* 下線との距離を少し空ける */
+}
+
+/* アクティブなタブ（おすすめ or マイリスト） */
+.header__tab.is-active {
+    color: #ff0000;
+    border-bottom: 2px solid #ff0000;
+    font-weight: 700;
+}
+
+/* ================================
+   フォントをInterに統一
+================================ */
+
+.header,
+.header__nav-link,
+.header__nav-button,
+.header__tab,
+.search-form__input {
+    font-family: "Inter", "Noto Sans JP", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/* ================================
+   商品一覧：4列グリッド
+================================ */
+
+/* 商品一覧ヘッダー（タイトル＋タブ） */
+.item-list__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.item-list__title {
+    font-size: 24px;
+    font-weight: 700;
+}
+
+/* 「すべての商品 / マイリスト」タブ */
+.item-list__tabs {
+    display: flex;
+    gap: 24px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 14px;
+}
+
+.item-list__tab a {
+    text-decoration: none;
+    color: #777777;
+    padding-bottom: 4px;
+}
+
+.item-list__tab.is-active a {
+    color: #000000;
+    font-weight: 600;
+    border-bottom: 2px solid #000000;
+}
+
+/* -------- グリッド本体：4列 -------- */
+.item-list__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 290px);
+    gap: 32px;
+    justify-content: center;
+    margin-top: 40px;
+    row-gap: 60px;
+}
+
+
+/* 画像エリア */
+.item-card__image-wrapper {
+    width: 290px;
+    height: 320px;
+    overflow: hidden;
+    background: #f5f5f5;
+    /* 画像ないとき用 */
+}
+
+/* 画像そのもの */
+.item-card__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* SOLDバッジ */
+.item-card__badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: #ff0000;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+
+/* =========================
+   商品名リンク
+========================= */
+
+.item-card {
+    text-decoration: none;
+    color: inherit;
+}
+
+.item-card__name {
+    font-size: 24px;
+    font-weight: 400;
+    /* 太字をやめる */
+    color: #000000;
+    text-decoration: none;
+    margin-top: 8px;
+    /* 12px → 8px に縮小 */
+    margin-bottom: 4px;
+    /* 価格との距離も軽く詰める */
+}
+
+
+/* ================================
+   商品詳細（PG03/PG04）
+================================ */
+
+/* ページ全体 */
+.item-detail {
+    max-width: 1512px;
+    margin: 0 auto;
+    padding: 0 40px 60px;
+    box-sizing: border-box;
+}
+
+/* パンくず */
+.item-detail__breadcrumb {
+    margin: 24px 0 20px;
+    font-size: 12px;
+    color: #888;
+}
+
+.item-detail__breadcrumb-link {
+    color: #888;
+    text-decoration: none;
+}
+
+.item-detail__breadcrumb-link:hover {
+    text-decoration: underline;
+}
+
+.item-detail__breadcrumb-sep {
+    margin: 0 6px;
+    color: #aaa;
+}
+
+.item-detail__breadcrumb-current {
+    color: #888;
+}
+
+/* 上段レイアウト（画像 / 情報） */
+.item-detail__top {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: start;
+}
+
+/* 画像 */
+.item-detail__image {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.item-detail__image-img {
+    width: 100%;
+    max-width: 560px;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 4px;
+    background: #f2f2f2;
+}
+
+/* 右側情報 */
+.item-detail__info {
+    min-width: 0;
+}
+
+.item-detail__name {
+    margin: 0 0 8px;
+    font-size: 45px;
+    font-weight: 700;
+    color: #111;
+    line-height: 1.3;
+}
+
+.item-detail__brand {
+    margin: 0 0 10px;
+    font-size: 20px;
+    color: #777;
+}
+
+.item-detail__price {
+    margin: 0 0 14px;
+    font-size: 30px;
+    font-weight: 400;
+    color: #111;
+}
+
+.item-detail__tax {
+    font-size: 16px;
+    font-weight: 400;
+    color: #777;
+    margin-left: 6px;
+}
+
+/* いいね / コメント */
+.item-detail__reaction {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    margin: 16px 0 20px;
+}
+
+/* 1セット（縦並びにする） */
+.item-detail__reaction-item {
+    display: flex;
+    flex-direction: column;
+    /* ← 縦並び */
+    align-items: center;
+    gap: 6px;
+}
+
+/* アイコンを大きく */
+.item-detail__icon {
+    font-size: 28px;
+    /* ← ここでサイズ調整 */
+    line-height: 1;
+}
+
+/* カウント数を下に */
+.item-detail__count {
+    font-size: 14px;
+    color: #444;
+}
+
+/* ボタンエリア */
+.item-detail__actions {
+    margin: 8px 0 18px;
+    font-size: 30px;
+}
+
+/* ボタン共通 */
+.item-detail__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 44px;
+    padding: 0 18px;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    font-size: 20px;
+    font-weight: 450;
+    text-decoration: none;
+    cursor: pointer;
+    box-sizing: border-box;
+    white-space: nowrap;
+}
+
+/* 購入ボタン（赤） */
+.item-detail__button--primary {
+    width: 360px;
+    max-width: 100%;
+    background: #ff4d4d;
+    color: #fff;
+    border-color: #ff4d4d;
+}
+
+.item-detail__button--primary:hover {
+    filter: brightness(0.97);
+}
+
+/* コメント送信（赤） */
+.item-detail__button--secondary {
+    width: 360px;
+    max-width: 100%;
+    background: #ff4d4d;
+    color: #fff;
+    border-color: #ff4d4d;
+}
+
+.item-detail__button--secondary:hover {
+    filter: brightness(0.97);
+}
+
+/* 未ログイン案内 */
+.item-detail__notice {
+    margin: 10px 0 0;
+    font-size: 12px;
+    color: #666;
+}
+
+.item-detail__notice-link {
+    color: #111;
+    text-decoration: underline;
+}
+
+/* セクション */
+.item-detail__section {
+    margin-top: 22px;
+}
+
+.item-detail__section-title {
+    margin: 0 0 12px;
+    font-size: 26px;
+    font-weight: 700;
+    color: #111;
+}
+
+/* 商品説明 */
+.item-detail__description {
+    margin: 0;
+    font-size: 14px;
+    color: #333;
+    line-height: 1.8;
+}
+
+/* 商品情報（dl） */
+.item-detail__meta {
+    margin: 0;
+}
+
+.item-detail__meta-row {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 16px;
+    align-items: center;
+    padding: 10px 0;
+}
+
+.item-detail__meta-label {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.item-detail__meta-value {
+    font-size: 12px;
+    color: #111;
+    margin: 0;
+}
+
+/* コメント一覧 */
+.item-detail__comments {
+    margin-top: 10px;
+}
+
+.item-detail__comments-empty {
+    margin: 0;
+    font-size: 12px;
+    color: #777;
+}
+
+.item-detail__comment {
+    margin: 12px 0;
+}
+
+.item-detail__comment-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.item-detail__comment-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #d9d9d9;
+    flex: 0 0 auto;
+}
+
+.item-detail__comment-name {
+    font-size: 12px;
+    font-weight: 700;
+    color: #111;
+}
+
+.item-detail__comment-body {
+    background: #efefef;
+    border-radius: 4px;
+    padding: 10px 12px;
+    font-size: 12px;
+    color: #333;
+    line-height: 1.6;
+}
+
+/* コメント投稿 */
+.item-detail__comment-form {
+    margin-top: 18px;
+}
+
+.item-detail__comment-form-title {
+    margin: 0 0 10px;
+    font-size: 20px;
+    font-weight: 700;
+    color: #111;
+}
+
+.item-detail__textarea {
+    width: 100%;
+    height: 160px;
+    padding: 12px;
+    border: 1px solid #bbb;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
+    resize: vertical;
+    outline: none;
+}
+
+.item-detail__textarea:focus {
+    border-color: #888;
+}
+
+/* エラー */
+.item-detail__error {
+    margin: 8px 0 0;
+    font-size: 12px;
+    color: #d00;
+}
+
+/* レスポンシブ */
+@media (max-width: 1024px) {
+    .item-detail {
+        padding: 0 24px 60px;
+    }
+
+    .item-detail__top {
+        gap: 40px;
+    }
+}
+
+@media (max-width: 768px) {
+    .item-detail__top {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+
+    .item-detail__image-img {
+        max-width: 100%;
+    }
+
+    .item-detail__button--primary,
+    .item-detail__button--secondary {
+        width: 100%;
+    }
+
+    .item-detail__meta-row {
+        grid-template-columns: 110px 1fr;
+    }
+}
+
+/* コメントタイトル */
+.item-detail__comment-title {
+    margin-top: 40px;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+/* コメント一覧 */
+.item-detail__comments {
+    margin-top: 16px;
+}
+
+/* コメント1件 */
+.comment {
+    margin-bottom: 20px;
+}
+
+/* ヘッダー */
+.comment__header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+/* 丸アイコン */
+.comment__avatar {
+    width: 32px;
+    height: 32px;
+    background-color: #ccc;
+    border-radius: 50%;
+}
+
+/* ユーザー名 */
+.comment__user {
+    font-weight: 600;
+}
+
+/* 本文ボックス */
+.comment__body {
+    background-color: #f2f2f2;
+    padding: 12px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* 空メッセージ */
+.comment__empty {
+    color: #999;
+    font-size: 14px;
+}
+
+/* 投稿フォーム */
+.item-detail__comment-form {
+    margin-top: 30px;
+}
+
+/* ラベル */
+.comment-form__label {
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+/* textarea */
+.comment-form__textarea {
+    width: 100%;
+    height: 120px;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    resize: none;
+    font-size: 14px;
+    margin-bottom: 16px;
+}
+
+/* 送信ボタン */
+.comment-form__button {
+    width: 100%;
+    padding: 12px;
+    background-color: #ff4b4b;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.comment-form__button:hover {
+    opacity: 0.9;
+}

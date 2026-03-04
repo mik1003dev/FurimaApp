@@ -1,0 +1,3 @@
+# MySQL (Docker volume)
+docker/mysql/data/
+docker/mysql/data/**
