@@ -1,3 +1,5 @@
 # MySQL (Docker volume)
 docker/mysql/data/
 docker/mysql/data/**
+*Zone.Identifier
+*:Zone.Identifier
