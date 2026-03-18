@@ -25,7 +25,7 @@
         @forelse ($items as $item)
         <a href="{{ url('/item/' . $item->id) }}" class="item-card">
             <div class="item-card__image-wrapper">
-                @if ($item->is_sold)
+                @if ($item->order)
                 <span class="item-card__badge item-card__badge--sold">SOLD</span>
                 @endif
                 <img
@@ -41,7 +41,11 @@
         @empty
         <p class="item-list__empty">
             @if (($activeTab ?? 'all') === 'mylist')
+            @guest
+            マイリストを見るには <a href="{{ url('/login') }}">ログイン</a> が必要です。
+            @else
             いいねした商品がありません。
+            @endguest
             @else
             商品がありません。
             @endif

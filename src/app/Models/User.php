@@ -21,6 +21,11 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'postal_code',
+        'address',
+        'building',
+        'avatar_path',
+        'profile_completed_at',
     ];
 
     /**
@@ -40,5 +45,35 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'profile_completed_at' => 'datetime',
     ];
+
+    public function hasCompletedProfile(): bool
+    {
+        return !empty($this->profile_completed_at);
+    }
+
+    public function items()
+    {
+        return $this->hasMany(Item::class);
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    public function purchasedItems()
+    {
+        return $this->belongsToMany(Item::class, 'orders')
+            ->withPivot([
+                'price',
+                'payment_method',
+                'shipping_postal_code',
+                'shipping_address',
+                'shipping_building',
+                'status',
+            ])
+            ->withTimestamps();
+    }
 }

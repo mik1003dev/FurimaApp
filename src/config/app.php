@@ -165,7 +165,7 @@ return [
         /*
          * Package Service Providers...
          */
-
+        Laravel\Fortify\FortifyServiceProvider::class,  // ← 追加
         /*
          * Application Service Providers...
          */
@@ -174,7 +174,7 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
-
+        App\Providers\FortifyServiceProvider::class,
     ],
 
     /*
