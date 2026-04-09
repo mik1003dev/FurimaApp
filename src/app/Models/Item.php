@@ -34,10 +34,6 @@ class Item extends Model
         14 => 'ベビー・キッズ',
     ];
 
-
-    // テーブル名はデフォルトで "items" なので指定不要だが、明示してもOK
-    // protected $table = 'items';
-
     /**
      * 一括代入を許可するカラム
      * テーブル定義とカラム名を完全一致させる
@@ -48,9 +44,7 @@ class Item extends Model
         'brand',
         'description',
         'price',
-        // 'category',
         'condition',
-        // 'is_sold',
     ];
 
     /**
@@ -59,9 +53,7 @@ class Item extends Model
      */
     protected $casts = [
         'price'    => 'integer',
-        // 'category' => 'integer',
         'condition' => 'integer',
-        // 'is_sold'  => 'boolean',
     ];
 
     /**
@@ -161,7 +153,6 @@ class Item extends Model
             return self::CATEGORY_LABELS[$code] ?? '未設定';
         }, $codes);
     }
-    
     public function getIsSoldAttribute(): bool
     {
         return $this->order()->exists();

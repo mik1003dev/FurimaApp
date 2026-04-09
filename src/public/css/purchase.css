@@ -220,13 +220,20 @@
 .purchase-block__address {
     margin: 0;
     padding-left: 30px;
+    width: calc(100% - 56px);
+    max-width: calc(100% - 56px);
+    box-sizing: border-box;
     font-size: 16px;
     font-weight: 600;
     line-height: 1.4;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
 .purchase-block--shipping .purchase-block__address {
-    width: auto;
+    width: calc(100% - 56px);
+    max-width: calc(100% - 56px);
     min-height: 58px;
     margin-left: 0;
     padding-left: 0;
@@ -487,7 +494,8 @@
     }
 
     .purchase-block--shipping .purchase-block__address {
-        width: auto;
+        width: 100%;
+        max-width: 100%;
         min-height: 0;
         margin-left: 0;
         padding-left: 30px;
@@ -589,6 +597,8 @@
 
     .purchase-block__address {
         font-size: 18px;
+        width: 100%;
+        max-width: 100%;
         padding-left: 0;
     }
 

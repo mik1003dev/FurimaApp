@@ -9,7 +9,6 @@ class ItemImage extends Model
 {
     use HasFactory;
 
-    // テーブル名（規約どおりでも動くが、設計書に合わせて明示しておいてもOK）
     // protected $table = 'item_images';
 
     /**

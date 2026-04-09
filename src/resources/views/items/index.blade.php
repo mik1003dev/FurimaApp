@@ -7,17 +7,7 @@
 {{-- PG01 / PG02：商品一覧画面 --}}
 <section class="item-list">
     <header class="item-list__header">
-        <!-- <h1 class="item-list__title">商品一覧</h1> -->
-
-        <!-- {{-- タブ切り替え（/?tab=mylist） --}}
-        <ul class="item-list__tabs">
-            <li class="item-list__tab {{ ($activeTab ?? 'all') === 'all' ? 'is-active' : '' }}">
-                <a href="{{ url('/') }}">すべての商品</a>
-            </li>
-            <li class="item-list__tab {{ ($activeTab ?? 'all') === 'mylist' ? 'is-active' : '' }}">
-                <a href="{{ url('/?tab=mylist') }}">マイリスト</a>
-            </li>
-        </ul> -->
+        <h1 class="item-list__title">商品一覧</h1>
     </header>
 
     {{-- 商品グリッド --}}

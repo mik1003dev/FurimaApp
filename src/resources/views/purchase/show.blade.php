@@ -3,7 +3,10 @@
 @section('title', '商品購入')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/purchase.css') }}">
+@php
+    $purchaseCssVersion = file_exists(public_path('css/purchase.css')) ? filemtime(public_path('css/purchase.css')) : null;
+@endphp
+<link rel="stylesheet" href="{{ asset('css/purchase.css') }}{{ $purchaseCssVersion ? '?v=' . $purchaseCssVersion : '' }}">
 @endpush
 
 @section('content')

@@ -2,6 +2,9 @@
    全体のベース
 ================================ */
 
+html {
+    scrollbar-gutter: stable;
+}
 
 body.app {
     margin: 0;
@@ -251,7 +254,7 @@ body.app {
     align-items: flex-end;
     /* 下揃えにしてラインに文字を寄せる */
     gap: 36px;
-    /* タブ同士の間隔（Figmaっぽく少し広め） */
+    /* タブ同士の間隔を広めに確保 */
     height: 44px;
     /* バーの高さ */
     padding-left: 110px;
@@ -601,11 +604,24 @@ body.app {
     -webkit-appearance: none;
 }
 
+.item-detail__icon-button--disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+}
+
+.item-detail__icon-button--liked {
+    transform: scale(1.03);
+}
+
 .item-detail__icon-image {
     display: block;
     width: 30px;
     height: 30px;
     object-fit: contain;
+}
+
+.item-detail__icon-image--liked {
+    filter: drop-shadow(0 0 1px rgba(255, 86, 85, 0.45));
 }
 
 /* カウント数を下に */
@@ -618,6 +634,7 @@ body.app {
 .item-detail__actions {
     margin: 0 0 16px;
     font-size: 16px;
+    width: 100%;
 }
 
 /* ボタン共通 */
@@ -641,7 +658,6 @@ body.app {
 /* 購入ボタン（赤） */
 .item-detail__button--primary {
     width: 100%;
-    max-width: 360px;
     background: #ff4d4d;
     color: #fff;
     border-color: #ff4d4d;
@@ -653,7 +669,6 @@ body.app {
 
 .item-detail__button--disabled {
     width: 100%;
-    max-width: 360px;
     background: #b8b8b8;
     color: #fff;
     border-color: #b8b8b8;
@@ -768,7 +783,7 @@ body.app {
 
 /* エラー */
 .item-detail__error {
-    margin: 8px 0 0;
+    margin: 2px 0 0;
     font-size: 12px;
     color: #d00;
 }
@@ -876,14 +891,13 @@ body.app {
 /* textarea */
 .comment-form__textarea {
     width: 100%;
-    max-width: 360px;
     height: 116px;
     padding: 10px;
     border: 1px solid #5f5f5f;
     border-radius: 4px;
     resize: none;
     font-size: 13px;
-    margin-bottom: 14px;
+    margin-bottom: 0;
     box-sizing: border-box;
 }
 
@@ -896,8 +910,8 @@ body.app {
 /* 送信ボタン */
 .comment-form__button {
     width: 100%;
-    max-width: 360px;
     height: 36px;
+    margin-top: 14px;
     padding: 0 12px;
     background-color: #ff4b4b;
     color: #fff;
@@ -981,8 +995,8 @@ body.app {
 .profile-edit .profile-edit__avatar-row {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    align-items: flex-start;
+    justify-content: flex-start;
     width: 100%;
     gap: 12px;
     margin-bottom: 26px;
@@ -990,11 +1004,11 @@ body.app {
 
 .profile-edit .profile-edit__avatar-stack {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     width: 100%;
-    gap: 16px;
+    gap: 24px;
 }
 
 .profile-edit .profile-edit__avatar-wrap {
@@ -1018,7 +1032,6 @@ body.app {
     justify-content: center;
     width: 156px;
     height: 44px;
-    margin: 0 auto;
     border: 2px solid #ff5655;
     border-radius: 10px;
     background: #fff;
@@ -1079,13 +1092,25 @@ body.app {
     opacity: 0.9;
 }
 
+@media (max-width: 768px) {
+    .profile-edit .profile-edit__avatar-row {
+        align-items: center;
+    }
+
+    .profile-edit .profile-edit__avatar-stack {
+        flex-direction: column;
+        justify-content: center;
+        gap: 16px;
+    }
+}
+
 /* ================================
    プロフィール画面
 ================================ */
 .profile-page {
     width: 100%;
     max-width: none;
-    margin: 0;
+    margin: 0 auto;
     padding: 8px 0 32px;
 }
 
@@ -1094,7 +1119,10 @@ body.app {
     grid-template-columns: 260px auto 1fr;
     align-items: center;
     gap: 32px;
-    padding: 26px 238px 34px;
+    max-width: 1232px;
+    margin: 0 auto;
+    padding: 26px 32px 34px;
+    box-sizing: border-box;
 }
 
 .profile-page__identity {
@@ -1146,8 +1174,10 @@ body.app {
 .profile-page__tabs {
     display: flex;
     gap: 30px;
-    padding: 0 68px 0;
+    width: 100%;
+    padding: 0 68px;
     border-bottom: 1px solid #5f5f5f;
+    box-sizing: border-box;
 }
 
 .profile-page__tab {
@@ -1169,19 +1199,22 @@ body.app {
 
 .profile-page__grid {
     display: grid;
-    grid-template-columns: repeat(4, 170px);
-    justify-content: start;
-    gap: 36px 28px;
-    padding: 28px 34px 0;
+    grid-template-columns: repeat(4, minmax(0, 252px));
+    justify-content: center;
+    gap: 76px 52px;
+    max-width: 1576px;
+    margin: 0 auto;
+    padding: 28px 32px 0;
+    box-sizing: border-box;
 }
 
 .profile-page__item-card {
-    width: 170px;
+    width: 100%;
 }
 
 .profile-page__item-image-wrapper {
-    width: 170px;
-    height: 170px;
+    width: 100%;
+    height: 252px;
     aspect-ratio: auto;
 }
 
@@ -1195,7 +1228,7 @@ body.app {
 @media (max-width: 1024px) {
     .profile-page__header {
         grid-template-columns: auto 1fr;
-        padding-inline: 48px;
+        padding-inline: 24px;
         padding-bottom: 26px;
     }
 
@@ -1224,8 +1257,8 @@ body.app {
 
     .profile-page__grid {
         justify-content: center;
-        grid-template-columns: repeat(3, 170px);
-        padding-inline: 48px;
+        grid-template-columns: repeat(3, minmax(0, 252px));
+        padding-inline: 24px;
     }
 
     .profile-page__tabs {
@@ -1281,8 +1314,8 @@ body.app {
         padding-inline: 0;
     }
 
-.profile-page__item-card,
-.profile-page__item-image-wrapper {
+    .profile-page__item-card,
+    .profile-page__item-image-wrapper {
         width: 150px;
         height: 150px;
     }
@@ -1750,6 +1783,23 @@ body.app {
     margin-top: 2px;
 }
 
+.login-panel__success {
+    margin: 0 0 18px;
+    padding: 12px 14px;
+    border-radius: 4px;
+    background: #ebfff2;
+    color: #0f7a39;
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+.login-panel__description {
+    margin: 0 0 14px;
+    color: #333333;
+    font-size: 18px;
+    line-height: 1.7;
+}
+
 .login-form__group {
     margin-bottom: 34px;
 }
@@ -1792,6 +1842,24 @@ body.app {
     opacity: 0.9;
 }
 
+.login-panel__secondary-button {
+    width: 100%;
+    height: 50px;
+    margin-top: 16px;
+    border: 1px solid #d0d0d0;
+    border-radius: 5px;
+    background: #ffffff;
+    color: #333333;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+.login-panel__secondary-button:hover {
+    background: #f7f7f7;
+}
+
 .login-panel__register {
     margin: 20px 0 0;
     text-align: center;
@@ -1802,6 +1870,119 @@ body.app {
     text-decoration: none;
     font-size: 18px;
     line-height: 1.2;
+}
+
+/* ================================
+   メール認証画面
+================================ */
+.verification-page-body {
+    margin: 0;
+    min-height: 100vh;
+    background: #ffffff;
+    font-family: "Inter", "Noto Sans JP", sans-serif;
+}
+
+.verification-page {
+    min-height: 100vh;
+    background: #ffffff;
+}
+
+.verification-panel {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #ffffff;
+}
+
+.verification-page-body .header {
+    border-bottom: none;
+}
+
+.verification-page-body .header__inner {
+    height: 80px;
+    padding: 0 24px;
+}
+
+.verification-page-body .header__logo {
+    width: auto;
+    height: 80px;
+}
+
+.verification-page-body .header__logo-image {
+    height: 36px;
+}
+
+.verification-panel__content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 28px;
+    width: 100%;
+    padding: 80px 24px 120px;
+    box-sizing: border-box;
+}
+
+.verification-panel__success {
+    margin: 0;
+    padding: 12px 18px;
+    border-radius: 4px;
+    background: #ebfff2;
+    color: #0f7a39;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+.verification-panel__message {
+    margin: 0;
+    color: #000000;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.5;
+    text-align: center;
+}
+
+.verification-panel__primary-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 258px;
+    height: 58px;
+    padding: 0 28px;
+    border: 1px solid #000000;
+    border-radius: 6px;
+    background: #d9d9d9;
+    color: #000000;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1;
+    text-decoration: none;
+    box-sizing: border-box;
+}
+
+.verification-panel__primary-button--disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.verification-panel__resend-form {
+    margin: 0;
+}
+
+.verification-panel__resend-link {
+    border: none;
+    padding: 0;
+    background: transparent;
+    color: #0073cc;
+    font-size: 20px;
+    line-height: 1.2;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.verification-panel__resend-link:hover {
+    text-decoration: underline;
 }
 
 @media (min-width: 1200px) and (max-width: 1600px) {
@@ -1865,5 +2046,38 @@ body.app {
 
     .login-panel__register-link {
         font-size: 17px;
+    }
+
+    .verification-page-body .header__inner {
+        height: 64px;
+        padding: 0 16px;
+    }
+
+    .verification-page-body .header__logo {
+        height: 64px;
+    }
+
+    .verification-page-body .header__logo-image {
+        height: 30px;
+    }
+
+    .verification-panel__content {
+        gap: 24px;
+        padding: 56px 20px 80px;
+    }
+
+    .verification-panel__message {
+        font-size: 20px;
+        line-height: 1.7;
+    }
+
+    .verification-panel__primary-button {
+        min-width: 220px;
+        height: 52px;
+        font-size: 20px;
+    }
+
+    .verification-panel__resend-link {
+        font-size: 18px;
     }
 }

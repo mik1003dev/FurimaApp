@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AddressRequest;
+use App\Http\Requests\PurchaseRequest;
 use App\Models\Item;
 use App\Models\Order;
 use Illuminate\Http\Request;
@@ -15,10 +17,19 @@ class PurchaseController extends Controller
         'card' => 2,
     ];
 
-    public function show(Item $item)
+    public function show(Item $item_id)
     {
+        $item = $item_id;
         $user = auth()->user();
 
+        // 出品者本人は自分の商品を購入できないようにする。
+        if ((int) $item->user_id === (int) $user->id) {
+            return redirect()
+                ->route('items.show', $item)
+                ->with('status', '自分が出品した商品は購入できません');
+        }
+
+        // 購入確認画面に商品情報と配送先情報を渡す。
         return view('purchase.show', [
             'item' => $item->load(['mainImage', 'order']),
             'user' => $user,
@@ -26,10 +37,19 @@ class PurchaseController extends Controller
         ]);
     }
 
-    public function editAddress(Item $item)
+    public function editAddress(Item $item_id)
     {
+        $item = $item_id;
         $user = auth()->user();
 
+        // 出品者本人は自分の商品を購入できないようにする。
+        if ((int) $item->user_id === (int) $user->id) {
+            return redirect()
+                ->route('items.show', $item)
+                ->with('status', '自分が出品した商品は購入できません');
+        }
+
+        // 配送先編集画面には商品情報と現在の配送先候補を表示する。
         return view('purchase.address', [
             'item' => $item->load(['mainImage']),
             'user' => $user,
@@ -37,21 +57,20 @@ class PurchaseController extends Controller
         ]);
     }
 
-    public function updateAddress(Request $request, Item $item)
+    public function updateAddress(AddressRequest $request, Item $item_id)
     {
-        $validated = $request->validate(
-            [
-                'postal_code' => ['required', 'regex:/^\\d{3}-\\d{4}$/'],
-                'address' => ['required', 'string', 'max:255'],
-                'building' => ['nullable', 'string', 'max:255'],
-            ],
-            [
-                'postal_code.required' => '郵便番号を入力してください',
-                'postal_code.regex' => '郵便番号はハイフンありの8文字で入力してください',
-                'address.required' => '住所を入力してください',
-            ]
-        );
+        $item = $item_id;
 
+        // 出品者本人は自分の商品を購入できないようにする。
+        if ((int) $item->user_id === (int) $request->user()->id) {
+            return redirect()
+                ->route('items.show', $item)
+                ->with('status', '自分が出品した商品は購入できません');
+        }
+
+        $validated = $request->validated();
+
+        // 入力された配送先を商品単位でセッションに保持する。
         $request->session()->put($this->shippingSessionKey($item), $validated);
 
         return redirect()
@@ -59,27 +78,30 @@ class PurchaseController extends Controller
             ->with('status', '配送先住所を更新しました');
     }
 
-    public function purchase(Request $request, Item $item)
+    public function purchase(PurchaseRequest $request, Item $item_id)
     {
+        $item = $item_id;
+
+        // 出品者本人は自分の商品を購入できないようにする。
+        if ((int) $item->user_id === (int) $request->user()->id) {
+            return redirect()
+                ->route('items.show', $item)
+                ->with('status', '自分が出品した商品は購入できません');
+        }
+
+        // すでに購入済みの商品は重複購入させない。
         if ($item->order()->exists()) {
             return redirect()
                 ->route('items.index')
                 ->with('status', 'この商品はすでに購入されています');
         }
 
-        $validated = $request->validate(
-            [
-                'payment_method' => ['required', 'in:convenience,card'],
-            ],
-            [
-                'payment_method.required' => '支払い方法を選択してください',
-                'payment_method.in' => '支払い方法が不正です',
-            ]
-        );
+        $validated = $request->validated();
 
         $user = $request->user();
         $shippingAddress = $this->getShippingAddress($request, $item, $user);
 
+        // 配送先が未登録の場合は住所入力画面へ戻す。
         if (empty($shippingAddress['postal_code']) || empty($shippingAddress['address'])) {
             return redirect()
                 ->route('purchase.address.edit', $item->id)
@@ -87,6 +109,7 @@ class PurchaseController extends Controller
         }
 
         $secret = config('services.stripe.secret');
+        // Stripe の設定不足時は決済処理を開始しない。
         if (empty($secret)) {
             return back()
                 ->withErrors(['payment_method' => 'Stripeの秘密鍵が未設定です（STRIPE_SECRET を設定してください）'])
@@ -95,6 +118,7 @@ class PurchaseController extends Controller
 
         $stripePaymentType = $validated['payment_method'] === 'convenience' ? 'konbini' : 'card';
 
+        // Stripe Checkout セッションを作成し、外部決済画面へ遷移させる。
         $response = Http::withToken($secret)
             ->asForm()
             ->post('https://api.stripe.com/v1/checkout/sessions', [
@@ -129,12 +153,14 @@ class PurchaseController extends Controller
         $sessionId = $payload['id'] ?? null;
         $checkoutUrl = $payload['url'] ?? null;
 
+        // セッションIDと遷移先URLが取得できなければエラー扱いにする。
         if (empty($sessionId) || empty($checkoutUrl)) {
             return back()
                 ->withErrors(['payment_method' => '決済画面の作成に失敗しました。時間をおいて再度お試しください'])
                 ->withInput();
         }
 
+        // 決済完了後に注文登録できるよう必要情報をセッションへ保持する。
         $request->session()->put('stripe_checkout.' . $sessionId, [
             'item_id' => $item->id,
             'user_id' => $user->id,
@@ -148,9 +174,12 @@ class PurchaseController extends Controller
         return redirect()->away($checkoutUrl);
     }
 
-    public function complete(Request $request, Item $item)
+    public function complete(Request $request, Item $item_id)
     {
+        $item = $item_id;
+
         $sessionId = (string) $request->query('session_id', '');
+        // Stripe からの戻り値にセッションIDが無い場合は購入失敗とする。
         if ($sessionId === '') {
             return redirect()
                 ->route('items.index')
@@ -158,6 +187,7 @@ class PurchaseController extends Controller
         }
 
         $checkoutData = $request->session()->get('stripe_checkout.' . $sessionId);
+        // セッション内の購入情報が一致しない場合は不正な完了処理を防ぐ。
         if (
             empty($checkoutData)
             || (int) $checkoutData['item_id'] !== (int) $item->id
@@ -168,6 +198,7 @@ class PurchaseController extends Controller
                 ->with('status', '購入情報が確認できませんでした');
         }
 
+        // 排他制御をかけながら注文を作成し、関連セッションを破棄する。
         DB::transaction(function () use ($item, $checkoutData, $sessionId, $request) {
             $lockedItem = Item::whereKey($item->id)->lockForUpdate()->firstOrFail();
             $alreadyOrdered = Order::where('item_id', $lockedItem->id)->exists();
@@ -200,6 +231,7 @@ class PurchaseController extends Controller
     {
         $shippingAddress = $request->session()->get($this->shippingSessionKey($item), []);
 
+        // セッション上の配送先があれば優先し、なければユーザー登録住所を使う。
         return [
             'postal_code' => $shippingAddress['postal_code'] ?? $user->postal_code,
             'address' => $shippingAddress['address'] ?? $user->address,

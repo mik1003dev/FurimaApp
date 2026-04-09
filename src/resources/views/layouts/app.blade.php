@@ -12,8 +12,16 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    {{-- COACHTECH 提供のCSSを読み込む --}}
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    @php
+        $sanitizeCssVersion = file_exists(public_path('css/sanitize.css')) ? filemtime(public_path('css/sanitize.css')) : null;
+        $appCssVersion = file_exists(public_path('css/app.css')) ? filemtime(public_path('css/app.css')) : null;
+    @endphp
+
+    {{-- ベースリセットを先に読み込み、画面差異を減らす --}}
+    <link rel="stylesheet" href="{{ asset('css/sanitize.css') }}{{ $sanitizeCssVersion ? '?v=' . $sanitizeCssVersion : '' }}">
+
+    {{-- CSS更新時にブラウザキャッシュが残らないようにする --}}
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}{{ $appCssVersion ? '?v=' . $appCssVersion : '' }}">
     @stack('styles')
 </head>
 

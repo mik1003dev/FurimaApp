@@ -5,9 +5,12 @@
 @section('content')
 @php
     $avatarTempPath = old('avatar_temp_path');
+    $storedAvatarPath = !empty($user->avatar_path) && \Illuminate\Support\Facades\Storage::disk('public')->exists($user->avatar_path)
+        ? $user->avatar_path
+        : null;
     $avatarPreviewUrl = $avatarTempPath
         ? asset('storage/' . $avatarTempPath)
-        : (!empty($user->avatar_path) ? asset('storage/' . $user->avatar_path) : null);
+        : ($storedAvatarPath ? asset('storage/' . $storedAvatarPath) : asset('images/default-avatar.png'));
 @endphp
 <section class="profile-edit">
     <h1 class="profile-edit__title">プロフィール設定</h1>
@@ -30,12 +33,7 @@
         <div class="profile-edit__avatar-row">
             <div class="profile-edit__avatar-stack">
                 <div class="profile-edit__avatar-wrap">
-                    @if ($avatarPreviewUrl)
-                        <img id="avatar-preview" src="{{ $avatarPreviewUrl }}" alt="プロフィール画像" class="profile-edit__avatar-image">
-                    @else
-                        <img id="avatar-preview" alt="プロフィール画像プレビュー" class="profile-edit__avatar-image" style="display: none;">
-                        <div id="avatar-placeholder" class="profile-edit__avatar-placeholder"></div>
-                    @endif
+                    <img id="avatar-preview" src="{{ $avatarPreviewUrl }}" alt="プロフィール画像" class="profile-edit__avatar-image">
                 </div>
                 <label for="avatar" class="profile-edit__avatar-button">画像を選択する</label>
             </div>
@@ -85,7 +83,6 @@
 document.addEventListener('DOMContentLoaded', function () {
     const input = document.getElementById('avatar');
     const preview = document.getElementById('avatar-preview');
-    const placeholder = document.getElementById('avatar-placeholder');
 
     if (!input || !preview) {
         return;
@@ -102,10 +99,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         preview.src = URL.createObjectURL(file);
-        preview.style.display = 'block';
-        if (placeholder) {
-            placeholder.style.display = 'none';
-        }
     });
 });
 </script>

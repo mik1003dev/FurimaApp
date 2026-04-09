@@ -7,6 +7,7 @@
 <section class="item-detail">
     @php
         $isSold = (bool) $item->order;
+        $isOwnItem = auth()->check() && (int) $item->user_id === (int) auth()->id();
     @endphp
 
     <div class="item-detail__top">
@@ -33,13 +34,24 @@
 
             <div class="item-detail__reaction">
                 {{-- いいね --}}
-                <form action="{{ route('likes.toggle', $item->id) }}" method="POST" class="item-detail__reaction-item">
-                    @csrf
-                    <button type="submit" class="item-detail__icon-button" aria-label="いいね">
+                <div class="item-detail__reaction-item">
+                    @if ($isOwnItem)
+                    <button type="button" class="item-detail__icon-button item-detail__icon-button--disabled" aria-label="いいね" disabled>
                         <img src="{{ asset('images/ハートロゴ_デフォルト.png') }}" alt="いいね" class="item-detail__icon-image">
                     </button>
+                    @else
+                    <form action="{{ route('likes.toggle', $item->id) }}" method="POST">
+                        @csrf
+                        <button type="submit" class="item-detail__icon-button {{ $isLikedByCurrentUser ? 'item-detail__icon-button--liked' : '' }}" aria-label="いいね">
+                            <img
+                                src="{{ asset($isLikedByCurrentUser ? 'images/ハートロゴ_ピンク.png' : 'images/ハートロゴ_デフォルト.png') }}"
+                                alt="いいね"
+                                class="item-detail__icon-image {{ $isLikedByCurrentUser ? 'item-detail__icon-image--liked' : '' }}">
+                        </button>
+                    </form>
+                    @endif
                     <span class="item-detail__count">{{ $item->likes_count ?? 0 }}</span>
-                </form>
+                </div>
 
                 {{-- コメント --}}
                 <div class="item-detail__reaction-item">
@@ -51,7 +63,7 @@
             </div>
 
             <div class="item-detail__actions">
-                @if ($isSold)
+                @if ($isSold || $isOwnItem)
                 <button type="button" class="item-detail__button item-detail__button--primary item-detail__button--disabled" disabled>
                     購入手続きへ
                 </button>
@@ -119,14 +131,14 @@
                     <textarea
                         name="body"
                         class="comment-form__textarea"
-                        placeholder="{{ $isSold ? '売り切れのためコメントできません。' : 'こちらにコメントが入ります。' }}"
-                        {{ $isSold ? 'disabled' : '' }}>{{ old('body') }}</textarea>
+                        placeholder="{{ $isOwnItem ? '自分が出品した商品にはコメントできません。' : ($isSold ? '売り切れのためコメントできません。' : 'こちらにコメントが入ります。') }}"
+                        {{ ($isSold || $isOwnItem) ? 'disabled' : '' }}>{{ old('body') }}</textarea>
 
                     @error('body')
                     <p class="item-detail__error">{{ $message }}</p>
                     @enderror
 
-                    @if ($isSold)
+                    @if ($isSold || $isOwnItem)
                     <button type="submit" class="comment-form__button" disabled>
                         コメントを送信する
                     </button>

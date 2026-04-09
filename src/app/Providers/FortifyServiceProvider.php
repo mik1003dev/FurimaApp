@@ -13,8 +13,10 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Laravel\Fortify\Contracts\LoginResponse;
 use Laravel\Fortify\Contracts\LogoutResponse;
 use Laravel\Fortify\Contracts\RegisterResponse;
+use Laravel\Fortify\Contracts\VerifyEmailResponse;
 use Laravel\Fortify\Fortify;
 
 class FortifyServiceProvider extends ServiceProvider
@@ -41,6 +43,28 @@ class FortifyServiceProvider extends ServiceProvider
         {
             public function toResponse($request)
             {
+                return redirect()->route('verification.notice');
+            }
+        });
+
+        $this->app->instance(LoginResponse::class, new class implements LoginResponse
+        {
+            public function toResponse($request)
+            {
+                if (! $request->user()->hasVerifiedEmail()) {
+                    $request->user()->sendEmailVerificationNotification();
+
+                    return redirect()->route('verification.notice');
+                }
+
+                return redirect()->intended(config('fortify.home'));
+            }
+        });
+
+        $this->app->instance(VerifyEmailResponse::class, new class implements VerifyEmailResponse
+        {
+            public function toResponse($request)
+            {
                 return redirect()->route('profile.edit');
             }
         });
@@ -57,6 +81,10 @@ class FortifyServiceProvider extends ServiceProvider
 
         Fortify::loginView(function () {
             return view('auth.login');
+        });
+
+        Fortify::verifyEmailView(function () {
+            return view('auth.verify-email');
         });
 
         Fortify::authenticateUsing(function (LoginRequest $request) {

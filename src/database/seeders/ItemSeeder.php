@@ -14,8 +14,6 @@ class ItemSeeder extends Seeder
      */
     public function run(): void
     {
-        $userId = 1;   // 実在するユーザーIDに合わせて必要なら変更
-
         // condition の数値マッピング
         $conditionMap = [
             '良好'                 => 1,
@@ -24,13 +22,13 @@ class ItemSeeder extends Seeder
             '状態が悪い'           => 4,
         ];
 
-        // 例：カテゴリコード（Item.php の CATEGORY_LABELS のキーに合わせる）
+        // カテゴリコード（Item.phpのCATEGORY_LABELSのキーに合わせる）
         // 1:ファッション, 2:家電, 3:インテリア, 4:レディース, 5:,
         // 6:コスメ, 7:本・音楽・ゲーム, 8:スポーツ・レジャー, 9:ハンドメイド, 10:その他
 
         $items = [
             [
-                'user_id'     => $userId,
+                'user_id'     => 1,
                 'name'        => '腕時計',
                 'price'       => 15000,
                 'brand'       => 'Rolax',
@@ -40,7 +38,7 @@ class ItemSeeder extends Seeder
                 'condition'   => $conditionMap['良好'],
             ],
             [
-                'user_id'     => $userId,
+                'user_id'     => 1,
                 'name'        => 'HDD',
                 'price'       => 5000,
                 'brand'       => '西芝',
@@ -50,7 +48,7 @@ class ItemSeeder extends Seeder
                 'condition'   => $conditionMap['目立った傷や汚れなし'],
             ],
             [
-                'user_id'     => $userId,
+                'user_id'     => 1,
                 'name'        => '玉ねぎ3束',
                 'price'       => 300,
                 'brand'       => 'なし',
@@ -60,7 +58,7 @@ class ItemSeeder extends Seeder
                 'condition'   => $conditionMap['やや傷や汚れあり'],
             ],
             [
-                'user_id'     => $userId,
+                'user_id'     => 2,
                 'name'        => '革靴',
                 'price'       => 4000,
                 'brand'       => null,
@@ -70,7 +68,7 @@ class ItemSeeder extends Seeder
                 'condition'   => $conditionMap['状態が悪い'],
             ],
             [
-                'user_id'     => $userId,
+                'user_id'     => 2,
                 'name'        => 'ノートPC',
                 'price'       => 45000,
                 'brand'       => null,
@@ -80,7 +78,7 @@ class ItemSeeder extends Seeder
                 'condition'   => $conditionMap['良好'],
             ],
             [
-                'user_id'     => $userId,
+                'user_id'     => 2,
                 'name'        => 'マイク',
                 'price'       => 8000,
                 'brand'       => 'なし',
@@ -90,7 +88,7 @@ class ItemSeeder extends Seeder
                 'condition'   => $conditionMap['目立った傷や汚れなし'],
             ],
             [
-                'user_id'     => $userId,
+                'user_id'     => 3,
                 'name'        => 'ショルダーバッグ',
                 'price'       => 3500,
                 'brand'       => null,
@@ -100,7 +98,7 @@ class ItemSeeder extends Seeder
                 'condition'   => $conditionMap['やや傷や汚れあり'],
             ],
             [
-                'user_id'     => $userId,
+                'user_id'     => 3,
                 'name'        => 'タンブラー',
                 'price'       => 500,
                 'brand'       => 'なし',
@@ -110,7 +108,7 @@ class ItemSeeder extends Seeder
                 'condition'   => $conditionMap['状態が悪い'],
             ],
             [
-                'user_id'     => $userId,
+                'user_id'     => 3,
                 'name'        => 'コーヒーミル',
                 'price'       => 4000,
                 'brand'       => 'Starbacks',
@@ -120,7 +118,7 @@ class ItemSeeder extends Seeder
                 'condition'   => $conditionMap['良好'],
             ],
             [
-                'user_id'     => $userId,
+                'user_id'     => 3,
                 'name'        => 'メイクセット',
                 'price'       => 2500,
                 'brand'       => null,
@@ -133,16 +131,13 @@ class ItemSeeder extends Seeder
 
         DB::transaction(function () use ($items) {
             foreach ($items as $data) {
-                // image_url だけ一旦退避
+                // image_urlを退避
                 $imageUrl = $data['image_url'] ?? null;
                 unset($data['image_url']);
 
-                // categories だけ退避（item_categories に入れる）
+                // categoriesを退避してitem_categoriesへ登録する
                 $categoryCodes = $data['categories'] ?? [];
                 unset($data['categories']);
-
-                // 互換のため、もし旧キーが残ってても items に入れない
-                unset($data['category'], $data['is_sold']);
 
                 // items テーブルに INSERT
                 $item = Item::create($data);

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ExhibitionRequest;
 use App\Models\Item;
 use App\Models\ItemCategory;
 use App\Models\ItemImage;
@@ -12,6 +13,7 @@ class ItemController extends Controller
 {
     public function create()
     {
+        // 出品フォームで使用する選択肢と、セッションに保持した画像パスを渡す。
         return view('items.create', [
             'categories' => Item::CATEGORY_LABELS,
             'conditions' => Item::CONDITION_LABELS,
@@ -19,69 +21,29 @@ class ItemController extends Controller
         ]);
     }
 
-    public function storeImage(Request $request)
+    public function storeImage(ExhibitionRequest $request)
     {
-        $uploadedImagePath = $request->input('uploaded_item_image');
+        $validated = $request->validated();
+        $uploadedImagePath = $validated['uploaded_item_image'] ?? null;
 
-        // 新規に画像が選択されている場合は先に検証して一時保存する。
-        // カテゴリーなど他項目のエラー時にも hidden で再表示できるようにするため。
+        // 新規画像があるときは保存後のパスを使い、なければ hidden の既存パスを再利用する。
         if ($request->hasFile('item_image')) {
-            $request->validate(
-                [
-                    'item_image' => ['image', 'mimes:jpeg,png,jpg', 'max:2048'],
-                ],
-                [
-                    'item_image.image' => '商品画像は画像ファイルを選択してください',
-                    'item_image.mimes' => '商品画像はjpegまたはpng形式で選択してください',
-                    'item_image.max' => '商品画像は2MB以下で選択してください',
-                ]
-            );
-
             $uploadedImagePath = $request->file('item_image')->store('items', 'public');
         }
-
-        $request->merge([
-            'uploaded_item_image' => $uploadedImagePath,
-        ]);
-
-        $request->validate(
-            [
-                'uploaded_item_image' => ['required'],
-                'category_codes' => ['required'],
-                'name' => ['required'],
-                'description' => ['required', 'max:255'],
-                'condition' => ['required'],
-                'price' => ['required', 'numeric', 'min:0'],
-                'brand' => ['nullable', 'string', 'max:255'],
-            ],
-            [
-                'uploaded_item_image.required' => '商品画像を選択してください',
-                'category_codes.required' => 'カテゴリーを1つ以上選択してください',
-                'name.required' => '商品名を入力してください',
-                'description.required' => '商品の説明を入力してください',
-                'description.max' => '商品の説明は255文字以内で入力してください',
-                'condition.required' => '商品の状態を選択してください',
-                'price.required' => '販売価格を入力してください',
-                'price.numeric' => '販売価格は数値で入力してください',
-                'price.min' => '販売価格は0円以上で入力してください',
-                'brand.max' => 'ブランド名は255文字以内で入力してください',
-            ]
-        );
-
-        $categoryCodes = collect((array) $request->input('category_codes', []))
+        $categoryCodes = collect($validated['category_codes'])
             ->map(fn ($code) => (int) $code)
-            ->filter(fn ($code) => isset(Item::CATEGORY_LABELS[$code]))
             ->unique()
             ->values();
 
-        DB::transaction(function () use ($request, $uploadedImagePath, $categoryCodes) {
+        // 商品本体・メイン画像・カテゴリ紐づけをまとめて登録する。
+        DB::transaction(function () use ($validated, $uploadedImagePath, $categoryCodes) {
             $item = Item::create([
                 'user_id' => auth()->id(),
-                'name' => $request->input('name'),
-                'brand' => $request->input('brand'),
-                'description' => $request->input('description'),
-                'price' => (int) $request->input('price'),
-                'condition' => (int) $request->input('condition'),
+                'name' => $validated['name'],
+                'brand' => $validated['brand'] ?? null,
+                'description' => $validated['description'],
+                'price' => (int) $validated['price'],
+                'condition' => (int) $validated['condition'],
             ]);
 
             ItemImage::create([
@@ -110,6 +72,11 @@ class ItemController extends Controller
 
     public function index(Request $request)
     {
+        // メール未認証ユーザーは一覧表示前に認証案内へ誘導する。
+        if (auth()->check() && ! auth()->user()->hasVerifiedEmail()) {
+            return redirect()->route('verification.notice');
+        }
+
         // どのタブがアクティブか（view 側のタブ表示用）
         $activeTab = $request->tab === 'mylist' ? 'mylist' : 'all';
         $keyword = trim((string) $request->input('keyword', ''));
@@ -118,6 +85,7 @@ class ItemController extends Controller
             ->withCount('likes')
             ->orderByDesc('created_at');
 
+        // 自分が出品した商品は一覧に表示しない。
         if (auth()->check()) {
             $query->where('items.user_id', '!=', auth()->id());
         }
@@ -142,6 +110,7 @@ class ItemController extends Controller
             }
         }
 
+        // 条件に合う商品一覧を取得して画面に渡す。
         $items = $query->get();
 
         return view('items.index', [
@@ -151,8 +120,11 @@ class ItemController extends Controller
     }
 
     // 商品詳細 PG03 / PG04
-    public function show(Item $item)
+    public function show(Item $item_id)
     {
+        $item = $item_id;
+
+        // 商品詳細表示に必要な関連データと件数をまとめて読み込む。
         $item->load([
             'seller',
             'images',
@@ -164,8 +136,14 @@ class ItemController extends Controller
         ])
             ->loadCount(['likes', 'comments']);
 
+        // ログイン中ユーザーがこの商品にいいね済みか判定する。
+        $isLikedByCurrentUser = auth()->check()
+            ? $item->likes()->where('user_id', auth()->id())->exists()
+            : false;
+
         return view('items.show', [
             'item' => $item,
+            'isLikedByCurrentUser' => $isLikedByCurrentUser,
         ]);
     }
 }

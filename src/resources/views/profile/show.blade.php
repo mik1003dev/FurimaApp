@@ -3,14 +3,18 @@
 @section('title', 'プロフィール')
 
 @section('content')
+@php
+    $avatarPath = !empty($user->avatar_path) && \Illuminate\Support\Facades\Storage::disk('public')->exists($user->avatar_path)
+        ? $user->avatar_path
+        : null;
+@endphp
 <section class="profile-page">
     <div class="profile-page__header">
         <div class="profile-page__identity">
-            @if (!empty($user->avatar_path))
-                <img src="{{ asset('storage/' . $user->avatar_path) }}" alt="{{ $user->name }}" class="profile-page__avatar-image">
-            @else
-                <div class="profile-page__avatar-placeholder" aria-hidden="true"></div>
-            @endif
+            <img
+                src="{{ $avatarPath ? asset('storage/' . $avatarPath) : asset('images/default-avatar.png') }}"
+                alt="{{ $user->name }}"
+                class="profile-page__avatar-image">
 
             <h1 class="profile-page__name">{{ $user->name }}</h1>
         </div>
