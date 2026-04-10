@@ -57,8 +57,12 @@ docker compose up -d --build
 # Laravel依存関係のインストール
 docker compose exec php bash -c "cd /var/www && composer install"
 
+# storage / cache の書き込み権限調整
+docker compose exec php bash -c "cd /var/www && chown -R www-data:www-data storage
+bootstrap/cache && chmod -R 775 storage bootstrap/cache"
+
 # アプリケーションキー生成
-docker compose exec php bash -c "cd /var/www && php artisan key:generate"
+     docker compose exec php bash -c "cd /var/www && php artisan key:generate"
 
 # マイグレーション・シーディング
 docker compose exec php bash -c "cd /var/www && php artisan migrate:fresh --seed"
@@ -66,6 +70,8 @@ docker compose exec php bash -c "cd /var/www && php artisan migrate:fresh --seed
 # storageシンボリックリンク作成
 docker compose exec php bash -c "cd /var/www && php artisan storage:link"
 ```
+
+※ 既存のローカル環境を流用して動作確認する場合は、以前のコンテナ・DB・キャッシュの状態により、最新のコードやマイグレーション、Seederの内容と不整合が起きることがあります。うまく動作しない場合は、コンテナの再構築と `php artisan migrate:fresh --seed` を実行してください。
 
 ---
 
@@ -308,6 +314,14 @@ docker compose exec php php artisan test
 ---
 
 ## 【 トラブルシューティング 】
+
+### 0. 初回アクセス時に `storage/logs/laravel.log` の書き込みエラーが出る場合
+
+初回アクセス時に `/var/www/storage/logs/laravel.log` の書き込み権限エラーが発生する場合は、`storage` と `bootstrap/cache` の権限を調整してください。
+
+```bash
+docker compose exec php bash -c "cd /var/www && chown -R www-data:www-data storage bootstrap/cache && chmod -R 775 storage bootstrap/cache"
+```
 
 ### 1. storage / cacheの書き込み権限エラーが出る場合
 
