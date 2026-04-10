@@ -12,8 +12,17 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    {{-- COACHTECH 提供のCSSを読み込む --}}
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    @php
+        $sanitizeCssVersion = file_exists(public_path('css/sanitize.css')) ? filemtime(public_path('css/sanitize.css')) : null;
+        $appCssVersion = file_exists(public_path('css/app.css')) ? filemtime(public_path('css/app.css')) : null;
+    @endphp
+
+    {{-- ベースリセットを先に読み込み、画面差異を減らす --}}
+    <link rel="stylesheet" href="{{ asset('css/sanitize.css') }}{{ $sanitizeCssVersion ? '?v=' . $sanitizeCssVersion : '' }}">
+
+    {{-- CSS更新時にブラウザキャッシュが残らないようにする --}}
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}{{ $appCssVersion ? '?v=' . $appCssVersion : '' }}">
+    @stack('styles')
 </head>
 
 <body class="app">
@@ -52,14 +61,31 @@
                 {{-- 右：ログイン / マイページ / 出品 --}}
                 <nav class="header__nav">
                     <ul class="header__nav-list">
+                        @guest
+                            <li class="header__nav-item">
+                                <a href="{{ route('login') }}" class="header__nav-link">ログイン</a>
+                            </li>
+                            <li class="header__nav-item">
+                                <a href="{{ route('login') }}" class="header__nav-link">マイページ</a>
+                            </li>
+                        @endguest
+                        @auth
+                            <li class="header__nav-item">
+                                <form action="{{ route('logout') }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="header__nav-link header__nav-logout">ログアウト</button>
+                                </form>
+                            </li>
+                            <li class="header__nav-item">
+                                <a href="{{ route('profile.show') }}" class="header__nav-link">マイページ</a>
+                            </li>
+                        @endauth
                         <li class="header__nav-item">
-                            <a href="#" class="header__nav-link">ログイン</a>
-                        </li>
-                        <li class="header__nav-item">
-                            <a href="#" class="header__nav-link">マイページ</a>
-                        </li>
-                        <li class="header__nav-item">
-                            <a href="#" class="header__nav-button">出品</a>
+                            @guest
+                                <a href="{{ route('login') }}" class="header__nav-button">出品</a>
+                            @else
+                                <a href="{{ route('items.create') }}" class="header__nav-button">出品</a>
+                            @endguest
                         </li>
                     </ul>
                 </nav>
@@ -69,13 +95,13 @@
             @if (request()->routeIs('items.index'))
             <div class="header__tabs">
                 <a
-                    href="{{ route('items.index') }}"
+                    href="{{ route('items.index', array_filter(['keyword' => request('keyword')])) }}"
                     class="header__tab {{ request('tab') !== 'mylist' ? 'is-active' : '' }}">
                     おすすめ
                 </a>
 
                 <a
-                    href="{{ route('items.index', ['tab' => 'mylist']) }}"
+                    href="{{ route('items.index', array_filter(['tab' => 'mylist', 'keyword' => request('keyword')])) }}"
                     class="header__tab {{ request('tab') === 'mylist' ? 'is-active' : '' }}">
                     マイリスト
                 </a>
@@ -84,9 +110,12 @@
         </header>
 
         {{-- フラッシュメッセージ --}}
-        @if (session('status'))
-        <div class="flash flash--success">
-            {{ session('status') }}
+        @if (session('status') && !request()->routeIs('profile.edit'))
+        <div class="flash flash--success" role="status" aria-live="polite">
+            <span class="flash__accent" aria-hidden="true"></span>
+            <div class="flash__body">
+                <p class="flash__message">{{ session('status') }}</p>
+            </div>
         </div>
         @endif
 
@@ -95,12 +124,6 @@
                 @yield('content')
             </div>
         </main>
-
-        <footer class="footer">
-            <div class="footer__inner">
-                <small>&copy; {{ date('Y') }} フリマアプリ</small>
-            </div>
-        </footer>
 
     </div>
 </body>

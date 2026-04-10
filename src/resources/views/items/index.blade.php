@@ -7,17 +7,7 @@
 {{-- PG01 / PG02：商品一覧画面 --}}
 <section class="item-list">
     <header class="item-list__header">
-        <!-- <h1 class="item-list__title">商品一覧</h1> -->
-
-        <!-- {{-- タブ切り替え（/?tab=mylist） --}}
-        <ul class="item-list__tabs">
-            <li class="item-list__tab {{ ($activeTab ?? 'all') === 'all' ? 'is-active' : '' }}">
-                <a href="{{ url('/') }}">すべての商品</a>
-            </li>
-            <li class="item-list__tab {{ ($activeTab ?? 'all') === 'mylist' ? 'is-active' : '' }}">
-                <a href="{{ url('/?tab=mylist') }}">マイリスト</a>
-            </li>
-        </ul> -->
+        <h1 class="item-list__title">商品一覧</h1>
     </header>
 
     {{-- 商品グリッド --}}
@@ -25,7 +15,7 @@
         @forelse ($items as $item)
         <a href="{{ url('/item/' . $item->id) }}" class="item-card">
             <div class="item-card__image-wrapper">
-                @if ($item->is_sold)
+                @if ($item->order)
                 <span class="item-card__badge item-card__badge--sold">SOLD</span>
                 @endif
                 <img
@@ -41,7 +31,11 @@
         @empty
         <p class="item-list__empty">
             @if (($activeTab ?? 'all') === 'mylist')
+            @guest
+            マイリストを見るには <a href="{{ url('/login') }}">ログイン</a> が必要です。
+            @else
             いいねした商品がありません。
+            @endguest
             @else
             商品がありません。
             @endif

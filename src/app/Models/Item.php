@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Order;
 
 class Item extends Model
 {
@@ -23,15 +24,15 @@ class Item extends Model
         4 => 'レディース',
         5 => 'メンズ',
         6 => 'コスメ',
-        7 => '本・音楽・ゲーム',
-        8 => 'スポーツ・レジャー',
-        9 => 'ハンドメイド',
-        10 => 'その他',
+        7 => '本',
+        8 => 'ゲーム',
+        9 => 'スポーツ',
+        10 => 'キッチン',
+        11 => 'ハンドメイド',
+        12 => 'アクセサリー',
+        13 => 'おもちゃ',
+        14 => 'ベビー・キッズ',
     ];
-
-
-    // テーブル名はデフォルトで "items" なので指定不要だが、明示してもOK
-    // protected $table = 'items';
 
     /**
      * 一括代入を許可するカラム
@@ -43,9 +44,7 @@ class Item extends Model
         'brand',
         'description',
         'price',
-        'category',
         'condition',
-        'is_sold',
     ];
 
     /**
@@ -54,9 +53,7 @@ class Item extends Model
      */
     protected $casts = [
         'price'    => 'integer',
-        'category' => 'integer',
         'condition' => 'integer',
-        'is_sold'  => 'boolean',
     ];
 
     /**
@@ -89,7 +86,7 @@ class Item extends Model
      */
     public function likes()
     {
-        return $this->hasMany(Like::class);
+        return $this->hasMany(\App\Models\Like::class);
     }
 
     /**
@@ -102,6 +99,14 @@ class Item extends Model
 
     /**
      * 注文（ordersテーブル）とのリレーション
+     */
+    public function order()
+    {
+        return $this->hasOne(Order::class);
+    }
+
+    /**
+     * 注文（ordersテーブル）とのリレーション（複数取得用）
      */
     public function orders()
     {
@@ -129,16 +134,27 @@ class Item extends Model
         return asset('images/no-image.png');
     }
 
-    public function getCategoryLabelAttribute(): string
-    {
-        $id = (int) ($this->category ?? 0);
-        return self::CATEGORY_LABELS[$id] ?? '未設定';
-    }
-
     public function getConditionLabelAttribute(): string
     {
         $id = (int) ($this->condition ?? 0);
         return self::CONDITION_LABELS[$id] ?? '未設定';
     }
 
+    public function itemCategories()
+    {
+        return $this->hasMany(ItemCategory::class);
+    }
+
+    public function getCategoryLabelsAttribute(): array
+    {
+        $codes = $this->itemCategories->pluck('category_code')->all();
+
+        return array_map(function ($code) {
+            return self::CATEGORY_LABELS[$code] ?? '未設定';
+        }, $codes);
+    }
+    public function getIsSoldAttribute(): bool
+    {
+        return $this->order()->exists();
+    }
 }
