@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use App\Models\Item;
 use App\Models\ItemImage;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class ItemSeeder extends Seeder
@@ -14,6 +15,20 @@ class ItemSeeder extends Seeder
      */
     public function run(): void
     {
+        $usersByEmail = User::query()
+            ->whereIn('email', ['u1@test.com', 'u2@test.com', 'u3@test.com'])
+            ->get()
+            ->keyBy('email');
+
+        $requiredEmails = ['u1@test.com', 'u2@test.com', 'u3@test.com'];
+        $missingEmails = array_values(array_filter($requiredEmails, fn ($email) => !$usersByEmail->has($email)));
+
+        if ($missingEmails !== []) {
+            throw new \RuntimeException(
+                'ItemSeeder requires seeded users: ' . implode(', ', $missingEmails)
+            );
+        }
+
         // condition の数値マッピング
         $conditionMap = [
             '良好'                 => 1,
@@ -28,7 +43,7 @@ class ItemSeeder extends Seeder
 
         $items = [
             [
-                'user_id'     => 1,
+                'user_id'     => $usersByEmail['u1@test.com']->id,
                 'name'        => '腕時計',
                 'price'       => 15000,
                 'brand'       => 'Rolax',
@@ -38,7 +53,7 @@ class ItemSeeder extends Seeder
                 'condition'   => $conditionMap['良好'],
             ],
             [
-                'user_id'     => 1,
+                'user_id'     => $usersByEmail['u1@test.com']->id,
                 'name'        => 'HDD',
                 'price'       => 5000,
                 'brand'       => '西芝',
@@ -48,7 +63,7 @@ class ItemSeeder extends Seeder
                 'condition'   => $conditionMap['目立った傷や汚れなし'],
             ],
             [
-                'user_id'     => 1,
+                'user_id'     => $usersByEmail['u1@test.com']->id,
                 'name'        => '玉ねぎ3束',
                 'price'       => 300,
                 'brand'       => 'なし',
@@ -58,7 +73,7 @@ class ItemSeeder extends Seeder
                 'condition'   => $conditionMap['やや傷や汚れあり'],
             ],
             [
-                'user_id'     => 2,
+                'user_id'     => $usersByEmail['u2@test.com']->id,
                 'name'        => '革靴',
                 'price'       => 4000,
                 'brand'       => null,
@@ -68,7 +83,7 @@ class ItemSeeder extends Seeder
                 'condition'   => $conditionMap['状態が悪い'],
             ],
             [
-                'user_id'     => 2,
+                'user_id'     => $usersByEmail['u2@test.com']->id,
                 'name'        => 'ノートPC',
                 'price'       => 45000,
                 'brand'       => null,
@@ -78,7 +93,7 @@ class ItemSeeder extends Seeder
                 'condition'   => $conditionMap['良好'],
             ],
             [
-                'user_id'     => 2,
+                'user_id'     => $usersByEmail['u2@test.com']->id,
                 'name'        => 'マイク',
                 'price'       => 8000,
                 'brand'       => 'なし',
@@ -88,7 +103,7 @@ class ItemSeeder extends Seeder
                 'condition'   => $conditionMap['目立った傷や汚れなし'],
             ],
             [
-                'user_id'     => 3,
+                'user_id'     => $usersByEmail['u3@test.com']->id,
                 'name'        => 'ショルダーバッグ',
                 'price'       => 3500,
                 'brand'       => null,
@@ -98,7 +113,7 @@ class ItemSeeder extends Seeder
                 'condition'   => $conditionMap['やや傷や汚れあり'],
             ],
             [
-                'user_id'     => 3,
+                'user_id'     => $usersByEmail['u3@test.com']->id,
                 'name'        => 'タンブラー',
                 'price'       => 500,
                 'brand'       => 'なし',
@@ -108,7 +123,7 @@ class ItemSeeder extends Seeder
                 'condition'   => $conditionMap['状態が悪い'],
             ],
             [
-                'user_id'     => 3,
+                'user_id'     => $usersByEmail['u3@test.com']->id,
                 'name'        => 'コーヒーミル',
                 'price'       => 4000,
                 'brand'       => 'Starbacks',
@@ -118,7 +133,7 @@ class ItemSeeder extends Seeder
                 'condition'   => $conditionMap['良好'],
             ],
             [
-                'user_id'     => 3,
+                'user_id'     => $usersByEmail['u3@test.com']->id,
                 'name'        => 'メイクセット',
                 'price'       => 2500,
                 'brand'       => null,
