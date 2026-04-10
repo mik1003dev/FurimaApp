@@ -8,7 +8,7 @@
 ## 【 環境構築 】
 本アプリケーションは、Dockerを利用して環境構築を行います。
 
-### 1. リポジトリの取得
+#### 1-1. リポジトリを取得
 
 任意の作業ディレクトリで以下を実行してください。
 
@@ -17,23 +17,20 @@ git clone <リポジトリURL>
 cd FurimaApp
 ```
 
-以降、Laravelアプリ本体は`src`配下にあるため、環境変数設定やArtisanコマンドは`src`を基準に実行します。
+#### 1-2. Laravelアプリの配置場所
 
-### 2. 環境変数の準備
+Laravelアプリ本体は`src`配下にあるため、環境変数設定やArtisanコマンドは`src`を基準に実行します。
 
-まず`src`ディレクトリへ移動します。
+#### 2-1. `src`配下で`.env`を作成
 
 ```bash
 cd src
-```
-
-`src`配下で`.env`を作成します。
-
-```bash
 cp .env.example .env
 ```
 
-`.env`のDB設定は以下を使用します。
+#### 2-2. `.env` のDB設定
+
+`.env` に以下を設定してください。
 
 ```env
 DB_CONNECTION=mysql
@@ -44,25 +41,52 @@ DB_USERNAME=laravel_user
 DB_PASSWORD=laravel_pass
 ```
 
-### 3. コンテナの起動とLaravelセットアップ
+#### 2-3. `.env` に Stripe のAPIキーを設定
+
+Stripe Checkout を利用するため、`src/.env` に Stripe のAPIキーを設定してください。
+
+Stripe のAPIキーは、Stripeダッシュボードから取得できます。
+
+1. [Stripe公式サイト](https://stripe.com/jp) にアクセスし、右上の「サインイン」からStripeダッシュボードにログインします。アカウントを未作成の場合は、先に新規登録を行ってください
+2. ダッシュボードでテストモードを有効にします
+3. 「開発者」→「APIキー」を開きます
+4. 公開可能キー `pk_test_...` と 秘密キー `sk_test_...` を確認します
+
+```env
+STRIPE_PUBLIC=pk_test_xxxxx
+STRIPE_SECRET=sk_test_xxxxx
+```
+
+- `STRIPE_PUBLIC` には公開可能キーを設定します
+- `STRIPE_SECRET` には秘密キーを設定します
+- 開発環境では `pk_test_...` / `sk_test_...` を使用してください
+- `.env.example` には実際のキーを書かず、空欄のまま共有してください
+
+#### 3-1. プロジェクトルートへ戻る
 
 コンテナ操作はプロジェクトルートで行うため、一度`FurimaApp`直下へ戻ってから実行します。
 
 ```bash
 cd ..
+```
 
+#### 3-2. コンテナの起動とLaravelセットアップ
+
+```bash
 # コンテナ起動
 docker compose up -d --build
 
 # Laravel依存関係のインストール
 docker compose exec php bash -c "cd /var/www && composer install"
 
-# storage / cache の書き込み権限調整
-docker compose exec php bash -c "cd /var/www && chown -R www-data:www-data storage
-bootstrap/cache && chmod -R 775 storage bootstrap/cache"
+# storage/cache の書き込み権限調整
+docker compose exec php bash -c "cd /var/www && chown -R www-data:www-data storage bootstrap/cache && chmod -R 775 storage bootstrap/cache"
 
 # アプリケーションキー生成
-     docker compose exec php bash -c "cd /var/www && php artisan key:generate"
+docker compose exec php bash -c "cd /var/www && php artisan key:generate"
+
+# 設定キャッシュクリア
+docker compose exec php bash -c "cd /var/www && php artisan config:clear && php artisan cache:clear"
 
 # マイグレーション・シーディング
 docker compose exec php bash -c "cd /var/www && php artisan migrate:fresh --seed"
@@ -315,15 +339,9 @@ docker compose exec php php artisan test
 
 ## 【 トラブルシューティング 】
 
-### 0. 初回アクセス時に `storage/logs/laravel.log` の書き込みエラーが出る場合
+### 1. `storage` / `bootstrap/cache` の書き込み権限エラーが出る場合
 
-初回アクセス時に `/var/www/storage/logs/laravel.log` の書き込み権限エラーが発生する場合は、`storage` と `bootstrap/cache` の権限を調整してください。
-
-```bash
-docker compose exec php bash -c "cd /var/www && chown -R www-data:www-data storage bootstrap/cache && chmod -R 775 storage bootstrap/cache"
-```
-
-### 1. storage / cacheの書き込み権限エラーが出る場合
+セットアップ後に権限エラーが発生した場合は、以下を再実行してください。
 
 ```bash
 docker compose exec php bash
