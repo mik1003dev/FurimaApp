@@ -10,7 +10,7 @@
         : null;
     $avatarPreviewUrl = $avatarTempPath
         ? asset('storage/' . $avatarTempPath)
-        : ($storedAvatarPath ? asset('storage/' . $storedAvatarPath) : asset('images/default-avatar.png'));
+        : ($storedAvatarPath ? asset('storage/' . $storedAvatarPath) : null);
 @endphp
 <section class="profile-edit">
     <h1 class="profile-edit__title">プロフィール設定</h1>
@@ -33,7 +33,11 @@
         <div class="profile-edit__avatar-row">
             <div class="profile-edit__avatar-stack">
                 <div class="profile-edit__avatar-wrap">
-                    <img id="avatar-preview" src="{{ $avatarPreviewUrl }}" alt="プロフィール画像" class="profile-edit__avatar-image">
+                    @if ($avatarPreviewUrl)
+                        <img id="avatar-preview" src="{{ $avatarPreviewUrl }}" alt="プロフィール画像" class="profile-edit__avatar-image">
+                    @else
+                        <div id="avatar-placeholder" class="profile-edit__avatar-placeholder" aria-label="プロフィール画像未設定"></div>
+                    @endif
                 </div>
                 <label for="avatar" class="profile-edit__avatar-button">画像を選択する</label>
             </div>
@@ -82,9 +86,11 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const input = document.getElementById('avatar');
+    const wrap = document.querySelector('.profile-edit__avatar-wrap');
     const preview = document.getElementById('avatar-preview');
+    const placeholder = document.getElementById('avatar-placeholder');
 
-    if (!input || !preview) {
+    if (!input || !wrap) {
         return;
     }
 
@@ -98,7 +104,20 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        preview.src = URL.createObjectURL(file);
+        const previewImage = preview || document.createElement('img');
+
+        previewImage.id = 'avatar-preview';
+        previewImage.alt = 'プロフィール画像';
+        previewImage.className = 'profile-edit__avatar-image';
+        previewImage.src = URL.createObjectURL(file);
+
+        if (!preview) {
+            wrap.appendChild(previewImage);
+        }
+
+        if (placeholder) {
+            placeholder.remove();
+        }
     });
 });
 </script>

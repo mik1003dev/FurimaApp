@@ -11,10 +11,14 @@
 <section class="profile-page">
     <div class="profile-page__header">
         <div class="profile-page__identity">
-            <img
-                src="{{ $avatarPath ? asset('storage/' . $avatarPath) : asset('images/default-avatar.png') }}"
-                alt="{{ $user->name }}"
-                class="profile-page__avatar-image">
+            @if ($avatarPath)
+                <img
+                    src="{{ asset('storage/' . $avatarPath) }}"
+                    alt="{{ $user->name }}"
+                    class="profile-page__avatar-image">
+            @else
+                <div class="profile-page__avatar-placeholder" aria-label="プロフィール画像未設定"></div>
+            @endif
 
             <h1 class="profile-page__name">{{ $user->name }}</h1>
         </div>
