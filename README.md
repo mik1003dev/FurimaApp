@@ -343,10 +343,20 @@ docker compose exec php php artisan test
 
 セットアップ後に権限エラーが発生した場合は、以下を再実行してください。
 
+プロフィール画像更新時に、以下のようなエラーが出る場合も同様に `storage` 配下の書き込み権限不足が原因です。
+
+- `fopen(/var/www/storage/app/public/avatars/....png): Failed to open stream: Permission denied`
+
 ```bash
 docker compose exec php bash
 chown -R www-data:www-data storage bootstrap/cache
 chmod -R 775 storage bootstrap/cache
+```
+
+あわせて、公開用のシンボリックリンクが未作成の場合は以下も実行してください。
+
+```bash
+docker compose exec php bash -c "cd /var/www && php artisan storage:link"
 ```
 
 ### 2. ローカルの`php artisan test`が失敗する場合
